@@ -15,7 +15,7 @@ df['Count'] = df[[col for col in df.columns if 'Trial' in col]].ge(0).sum(axis=1
 # Print N, IT, Max and Min
 print(df[['N', 'IT', 'Max', 'Min', 'Avg', 'Count']])
 
-# Plot a 3d surface plot between N, IT and Avg
+# Plot a 3d surface plot between N, IT and Count
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 surf=ax.plot_trisurf(df['N'], df['IT'], df['Count'], cmap=plt.cm.coolwarm, linewidth=0.2)
