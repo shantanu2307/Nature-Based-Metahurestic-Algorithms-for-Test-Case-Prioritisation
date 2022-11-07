@@ -649,6 +649,15 @@ void printFitnessValues(){
     // Stack based Weight Algorithm
     Graph g(n, edges);
     g.printNodeFitness();
+    vector<int>outDegree=g.getOutDegree();
+    int d=0;
+    for(int i=0;i<n;i++){
+        if(outDegree[i]>1){
+            cout<<i+1<<" "<<outDegree[i]<<endl;
+            d++;
+        }
+    }
+    cout<<"Dimensions: "<<d<<endl;
 }
 
 int main()
@@ -665,5 +674,6 @@ int main()
 
     srand(time(0)); 
     printFitnessValues();   
+    // getCountsWhereGrassHopperDominatesGenetic();
     return 0;
 }
