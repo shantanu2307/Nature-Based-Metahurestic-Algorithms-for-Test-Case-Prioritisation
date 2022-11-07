@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('output.csv')
+df = pd.read_csv('csv/fitness.csv')
 
 # Label 1st column as N, 2nd column as IT and rest all as Trial 1, Trial 2, etc.
 df.columns = ['N', 'IT'] + ['Trial ' + str(i) for i in range(1, len(df.columns) - 1)]
