@@ -577,7 +577,7 @@ int main()
 
 #ifndef ONLINE_JUDGE
     freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
+    freopen("output.csv", "w", stdout);
 #endif
 
     srand(time(0));
@@ -589,52 +589,42 @@ int main()
         cin >> u >> v;
         edges.push_back({ u - 1, v - 1 });
     }
-    int goa = 0, gc = 0;
-    //int tc = 0;
+    
     for(int hyperparameters = 2; hyperparameters <= n/2; hyperparameters++){
         for(int maxIterations = 2; maxIterations <= n; maxIterations++){
-            //tc++;
-            //cout<<hyperparameters<<","<<maxIterations<<",";
+            cout<<"N,"<<hyperparameters<<","<<"IT,"<<maxIterations<<",";
             int trials = 1000;
-            int grasshopperFitness = 0;
-            int geneticFitness = 0;
-            vector<int> grasshopperFitnessMinusGeneticFitness;
+            double averageGrasshopperFitness = 0;
+            double averageGeneticFitness = 0;
             while(trials--){
                 GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);  
-                grasshopperFitness = grasshopper.getBestFitness();  
+                averageGrasshopperFitness = grasshopper.getBestFitness();  
                 Genetic genetic(n, edges, hyperparameters, maxIterations);
-                geneticFitness = genetic.getBestFitness();
-                grasshopperFitnessMinusGeneticFitness.push_back(grasshopperFitness - geneticFitness);
+                averageGeneticFitness = genetic.getBestFitness();
             }
-            for(int i = 0; i<999; i++){
-                cout<<grasshopperFitnessMinusGeneticFitness[i]<<",";
-            }
-            cout<<grasshopperFitnessMinusGeneticFitness[999]<<endl;
-            //cout<<averageGrasshopperFitness<<","<<averageGeneticFitness<<endl;
-            // if(averageGrasshopperFitness==61) goa++;
-            // if(averageGeneticFitness==61) gc++;
+            cout<<averageGrasshopperFitness<<","<<averageGeneticFitness<<endl;
         }
     }
-    //cout<<tc<<" "<<goa<<" "<<gc<<endl;
-    // int hyperparameters = 6;
-    // int maxIterations = 12;
-    // for(double f = 0; f <= 2; f += 0.1){
-    //     for(double l = 0; l <= 2; l += 0.1){
-    //         for(double cmin = 0.1; cmin <= 0.1; cmin += 0.1){
-    //             cout<<"F,"<<f<<","<<"L,"<<l<<","<<"C,"<<cmin<<",";
-    //             int trials = 1000;
-    //             int grasshopperWins = 0;
-    //             while(trials--){
-    //                 GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, f, l, cmin, 0.00010000000000000000);  
-    //                 int grasshopperFitness = grasshopper.getBestFitness();  
-    //                 Genetic genetic(n, edges, hyperparameters, maxIterations);
-    //                 int geneticFitness = genetic.getBestFitness();
-    //                 grasshopperWins += (grasshopperFitness >= geneticFitness);
-    //             }
-    //             cout<<grasshopperWins<<endl;
-    //         }
-    //     }
-    // }
+
+    int hyperparameters = 6;
+    int maxIterations = 12;
+    for(double f = 0; f <= 2; f += 0.1){
+        for(double l = 0; l <= 2; l += 0.1){
+            for(double cmin = 0; cmin <= 2; cmin += 0.1){
+                cout<<"F,"<<f<<","<<"L,"<<l<<","<<"C,"<<cmin<<",";
+                int trials = 1000;
+                int grasshopperWins = 0;
+                while(trials--){
+                    GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, f, l, cmin, 0.00010000000000000000);  
+                    int grasshopperFitness = grasshopper.getBestFitness();  
+                    Genetic genetic(n, edges, hyperparameters, maxIterations);
+                    int geneticFitness = genetic.getBestFitness();
+                    grasshopperWins += (grasshopperFitness >= geneticFitness);
+                }
+                cout<<grasshopperWins<<endl;
+            }
+        }
+    }
     
     return 0;
 }
