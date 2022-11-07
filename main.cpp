@@ -87,6 +87,7 @@ public:
             for (auto j : distinctLevels[i]) {
                 stackBasedWeight[i] += (maxDepth - j);
             }
+            stackBasedWeight[i]++;
         }
     }
 
@@ -197,8 +198,9 @@ public:
     }
 
     void printNodeFitness(){
+        cout<<"Node,"<<"Stack Based Weight,"<<"Information Gain,"<<"Fitness Value"<<endl;
         for (int i = 0; i < numberOfNodes; i++) {
-            cerr << i + 1 << ": " << stackBasedWeight[i] << " " << informationGain[i] << " " << fitnessValue[i] << endl;
+            cout << i + 1 << "," << stackBasedWeight[i] << "," << informationGain[i] << "," << fitnessValue[i] << endl;
         }
     }
 
@@ -467,26 +469,26 @@ class Genetic{
         return parent1;
     }
 
-    // void unitTesting(){
-    //     vector<string> a;
-    //     for(int i = 0; i < pow(2, 8); i++){
-    //         string s = "";
-    //         for(int j = 0; j < 8; j++){
-    //             if(i & (1 << j))
-    //                 s += '1';
-    //             else
-    //                 s += '0';
-    //         }
-    //         a.push_back(s);
-    //     }
-    //     for(auto i: a){
-    //         if(isChromosomeInBounds(i)){
-    //             if(pathFitness.find(i) != pathFitness.end()){
-    //                 cout << i << endl;
-    //             }
-    //         }
-    //     }
-    // }
+    void unitTesting(){
+        vector<string> a;
+        for(int i = 0; i < pow(2, 8); i++){
+            string s = "";
+            for(int j = 0; j < 8; j++){
+                if(i & (1 << j))
+                    s += '1';
+                else
+                    s += '0';
+            }
+            a.push_back(s);
+        }
+        for(auto i: a){
+            if(isChromosomeInBounds(i)){
+                if(pathFitness.find(i) != pathFitness.end()){
+                    cout << i << endl;
+                }
+            }
+        }
+    }
 
     //initialise population
     void initialisePopulation(){
@@ -568,19 +570,8 @@ class Genetic{
 
 };
 
-int main()
-{
 
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
-
-#ifndef ONLINE_JUDGE
-    freopen("input.txt", "r", stdin);
-    freopen("output.csv", "w", stdout);
-#endif
-
-    srand(time(0));
+void compareAverageFitness(){
     int n, e;
     cin >> n >> e;
     vector<pair<int, int>> edges;
@@ -590,24 +581,37 @@ int main()
         edges.push_back({ u - 1, v - 1 });
     }
 
-    // cout<<"N,"<<"IT,"<<"Average GrassHopper Fitness,"<<"Average Genetic Fitness"<<endl;
-    // for(int hyperparameters = 2; hyperparameters <= n/2; hyperparameters++){
-    //     for(int maxIterations = 2; maxIterations <= n; maxIterations++){
-    //         cout<<hyperparameters<<","<<maxIterations<<",";
-    //         int trials = 1000;
-    //         double averageGrasshopperFitness = 0;
-    //         double averageGeneticFitness = 0;
-    //         while(trials--){
-    //             GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);  
-    //             averageGrasshopperFitness = grasshopper.getBestFitness();  
-    //             Genetic genetic(n, edges, hyperparameters, maxIterations);
-    //             averageGeneticFitness = genetic.getBestFitness();
-    //         }
-    //         cout<<averageGrasshopperFitness<<","<<averageGeneticFitness<<endl;
-    //     }
-    // }
+    // Comparing average fitness of GrassHopper and Genetic Algorithm 
+    cout<<"N,"<<"IT,"<<"Average GrassHopper Fitness,"<<"Average Genetic Fitness"<<endl;
+    for(int hyperparameters = 2; hyperparameters <= n/2; hyperparameters++){
+        for(int maxIterations = 2; maxIterations <= n; maxIterations++){
+            cout<<hyperparameters<<","<<maxIterations<<",";
+            int trials = 1000;
+            double averageGrasshopperFitness = 0;
+            double averageGeneticFitness = 0;
+            while(trials--){
+                GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);  
+                averageGrasshopperFitness = grasshopper.getBestFitness();  
+                Genetic genetic(n, edges, hyperparameters, maxIterations);
+                averageGeneticFitness = genetic.getBestFitness();
+            }
+            cout<<averageGrasshopperFitness<<","<<averageGeneticFitness<<endl;
+        }
+    }
+}
 
 
+void getCountsWhereGrassHopperDominatesGenetic(){
+    int n, e;
+    cin >> n >> e;
+    vector<pair<int, int>> edges;
+    for (int i = 0; i < e; i++) {
+        int u, v;
+        cin >> u >> v;
+        edges.push_back({ u - 1, v - 1 });
+    }
+
+    // Getting counts where GrassHopper is better than genetic algorithm
     cout<<"F,"<<"L,"<<"C,"<<"Count"<<endl;
     int hyperparameters = 6;
     int maxIterations = 12;
@@ -628,6 +632,38 @@ int main()
             }
         }
     }
+
+}
+
+void printFitnessValues(){
+    int n, e;
+    cin >> n >> e;
+    vector<pair<int, int>> edges;
+    for (int i = 0; i < e; i++) {
+        int u, v;
+        cin >> u >> v;
+        edges.push_back({ u - 1, v - 1 });
+    }
+
     
+    // Stack based Weight Algorithm
+    Graph g(n, edges);
+    g.printNodeFitness();
+}
+
+int main()
+{
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+#ifndef ONLINE_JUDGE
+    freopen("input.txt", "r", stdin);
+    freopen("output.csv", "w", stdout);
+#endif
+
+    srand(time(0)); 
+    printFitnessValues();   
     return 0;
 }
