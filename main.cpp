@@ -589,29 +589,32 @@ int main()
         cin >> u >> v;
         edges.push_back({ u - 1, v - 1 });
     }
-    
-    for(int hyperparameters = 2; hyperparameters <= n/2; hyperparameters++){
-        for(int maxIterations = 2; maxIterations <= n; maxIterations++){
-            cout<<"N,"<<hyperparameters<<","<<"IT,"<<maxIterations<<",";
-            int trials = 1000;
-            double averageGrasshopperFitness = 0;
-            double averageGeneticFitness = 0;
-            while(trials--){
-                GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);  
-                averageGrasshopperFitness = grasshopper.getBestFitness();  
-                Genetic genetic(n, edges, hyperparameters, maxIterations);
-                averageGeneticFitness = genetic.getBestFitness();
-            }
-            cout<<averageGrasshopperFitness<<","<<averageGeneticFitness<<endl;
-        }
-    }
 
+    // cout<<"N,"<<"IT,"<<"Average GrassHopper Fitness,"<<"Average Genetic Fitness"<<endl;
+    // for(int hyperparameters = 2; hyperparameters <= n/2; hyperparameters++){
+    //     for(int maxIterations = 2; maxIterations <= n; maxIterations++){
+    //         cout<<hyperparameters<<","<<maxIterations<<",";
+    //         int trials = 1000;
+    //         double averageGrasshopperFitness = 0;
+    //         double averageGeneticFitness = 0;
+    //         while(trials--){
+    //             GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);  
+    //             averageGrasshopperFitness = grasshopper.getBestFitness();  
+    //             Genetic genetic(n, edges, hyperparameters, maxIterations);
+    //             averageGeneticFitness = genetic.getBestFitness();
+    //         }
+    //         cout<<averageGrasshopperFitness<<","<<averageGeneticFitness<<endl;
+    //     }
+    // }
+
+
+    cout<<"F,"<<"L,"<<"C,"<<"Count"<<endl;
     int hyperparameters = 6;
     int maxIterations = 12;
-    for(double f = 0; f <= 2; f += 0.1){
-        for(double l = 0; l <= 2; l += 0.1){
+    for(double f = 0.1; f <= 2; f += 0.1){
+        for(double l = 0.1; l <= 2; l += 0.1){
             for(double cmin = 0; cmin <= 2; cmin += 0.1){
-                cout<<"F,"<<f<<","<<"L,"<<l<<","<<"C,"<<cmin<<",";
+                cout<<f<<","<<l<<","<<cmin<<",";
                 int trials = 1000;
                 int grasshopperWins = 0;
                 while(trials--){
