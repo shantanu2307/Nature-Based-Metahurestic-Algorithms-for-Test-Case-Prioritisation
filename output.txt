@@ -1,3 +1,0 @@
-Best Solution: Cheetah 65
-Best Solution: GrassHopper 42
-Best Solution: Genetic 51
