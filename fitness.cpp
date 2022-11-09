@@ -5,7 +5,6 @@
 #include <map>
 #include <queue>
 #include <unordered_map>
-#include <set>
 #include <unordered_set>
 #include <vector>
 using namespace std;
@@ -62,33 +61,15 @@ public:
         }
     }
 
-    void bfs(vector<set<vector<int>>>&res){
-        vector<bool>vis(numberOfNodes, 0);
-        queue<int> q;
-        q.push(0);
-        int level=0;
-        vis[0] = true;
-        while(!q.empty()){
-            int sz=q.size();
-            set<vector<int>>nkCombination;
-            while(sz--){
-                int curr=q.front();
-                q.pop();
-                for(int node:adj[curr]){
-                    if(!vis[node]){
-                        vis[node]=true;
-                        q.push(node);
-                        nkCombination.insert({node, level+1});
-                    }
-                    if(node==(numberOfNodes-1)){
-                        nkCombination.insert({node, level+1});
-                    }
-                }
+    void dfs(int node, int level, vector<bool>& vis, int maxDepth, vector<unordered_set<int>>& distinctLevels){
+        distinctLevels[node].insert(level);
+        vis[node] = true;
+        for (int child : adj[node]) {
+            if (!vis[child]) {
+                dfs(child, level + 1, vis, maxDepth, distinctLevels);
+            } else {
+                distinctLevels[child].insert(level + 1);
             }
-            if(!nkCombination.empty()){
-                res.push_back(nkCombination);
-            }
-            level++;
         }
     }
 
@@ -99,13 +80,12 @@ public:
         for (int i = 0; i < numberOfNodes; i++) {
             maxDepth = max(maxDepth, reverseHeight[i]);
         }
-        maxDepth++;
-        vector<set<vector<int>>>res;
-        bfs(res);
-        stackBasedWeight[0]=maxDepth;
-        for(auto i:res){
-            for(auto j:i){
-                stackBasedWeight[j[0]]+=maxDepth-j[1];
+        vector<bool> vis(numberOfNodes, false);
+        vector<unordered_set<int>> distinctLevels(numberOfNodes);
+        dfs(0, 0, vis, maxDepth, distinctLevels);
+        for (int i = 0; i < numberOfNodes; i++) {
+            for (auto j : distinctLevels[i]) {
+                stackBasedWeight[i] += (maxDepth - j);
             }
         }
     }
@@ -217,9 +197,8 @@ public:
     }
 
     void printNodeFitness(){
-        cout<<"Node,"<<"Stack Based Weight,"<<"Information Gain,"<<"Fitness Value"<<endl;
         for (int i = 0; i < numberOfNodes; i++) {
-            cout << i + 1 << "," << stackBasedWeight[i] << "," << informationGain[i] << "," << fitnessValue[i] << endl;
+            cerr << i + 1 << ": " << stackBasedWeight[i] << " " << informationGain[i] << " " << fitnessValue[i] << endl;
         }
     }
 
@@ -390,11 +369,11 @@ public:
 class Genetic{
     int populationSize;
     int maxIterations;
-    int numberOfNodes;
-    int maxBitSize;
+	int numberOfNodes;
+	int maxBitSize;
     vector<vector<int>> paths;
     unordered_map<string, double> pathFitness;
-    vector<int> lowerBound;
+	vector<int> lowerBound;
     vector<int> upperBound;
     vector<int> decisionNodes;
     vector<string> population;
@@ -404,15 +383,15 @@ class Genetic{
     
     public:
     Genetic(int numberOfNodes, vector<pair<int, int>> edges, int populationSize, int maxIterations){
-        this->decisionNodes = {};
-        this->numberOfNodes = numberOfNodes;
-        this->populationSize = populationSize;
-        this->maxIterations=maxIterations;
-        graph = new Graph(numberOfNodes,edges);
+		this->decisionNodes = {};
+		this->numberOfNodes = numberOfNodes;
+		this->populationSize = populationSize;
+		this->maxIterations=maxIterations;
+		graph = new Graph(numberOfNodes,edges);
         vector<int> outDegree = graph->getOutDegree();
         map<vector<int>, int> pFitness = graph->getPathFitness();
         calculateBounds(outDegree);
-        generateChromosomes(pFitness, outDegree);
+		generateChromosomes(pFitness, outDegree);
         initialisePopulation();
         //unitTesting();
     }
@@ -447,8 +426,8 @@ class Genetic{
 
     //mutate
     string mutate(string chromosome){
-        int trials = 100;
-        while(trials--){
+		int trials = 100;
+		while(trials--){
             int random = rand() % chromosome.length();
             string mutatedChromosome = chromosome;
             if(mutatedChromosome[random] == '0')
@@ -458,9 +437,9 @@ class Genetic{
             
             if(isChromosomeInBounds(mutatedChromosome))
                 return mutatedChromosome;
-        }
-        return chromosome;
-    }
+		}
+		return chromosome;
+	}
 
     string substr(string chromosome, int start, int end){
         string sub = "";
@@ -471,43 +450,43 @@ class Genetic{
     }
 
     //crossover
-    string crossover(string parent1, string parent2){
+	string crossover(string parent1, string parent2){
         assert(parent1.length() == parent2.length());
         assert(parent1.length() > 0);
-        int trials = 100;
-        while(trials--){
-            int crossoverPoint = 1;
-            string child1 = substr(parent1, 0, crossoverPoint) + substr(parent2, crossoverPoint, parent2.length());
-            string child2 = substr(parent2, 0, crossoverPoint) + substr(parent1, crossoverPoint, parent1.length());
+		int trials = 100;
+		while(trials--){
+			int crossoverPoint = 1;
+			string child1 = substr(parent1, 0, crossoverPoint) + substr(parent2, crossoverPoint, parent2.length());
+			string child2 = substr(parent2, 0, crossoverPoint) + substr(parent1, crossoverPoint, parent1.length());
             if(isChromosomeInBounds(child1) && isChromosomeInBounds(child2)){
                 if (pathFitness[child1] > pathFitness[child2])
-                    return child1;
-                return child2;
+				    return child1;
+			    return child2;
             }
-        }
-        return parent1;
-    }
+		}
+		return parent1;
+	}
 
-    void unitTesting(){
-        vector<string> a;
-        for(int i = 0; i < pow(2, 8); i++){
-            string s = "";
-            for(int j = 0; j < 8; j++){
-                if(i & (1 << j))
-                    s += '1';
-                else
-                    s += '0';
-            }
-            a.push_back(s);
-        }
-        for(auto i: a){
-            if(isChromosomeInBounds(i)){
-                if(pathFitness.find(i) != pathFitness.end()){
-                    cout << i << endl;
-                }
-            }
-        }
-    }
+    // void unitTesting(){
+    //     vector<string> a;
+    //     for(int i = 0; i < pow(2, 8); i++){
+    //         string s = "";
+    //         for(int j = 0; j < 8; j++){
+    //             if(i & (1 << j))
+    //                 s += '1';
+    //             else
+    //                 s += '0';
+    //         }
+    //         a.push_back(s);
+    //     }
+    //     for(auto i: a){
+    //         if(isChromosomeInBounds(i)){
+    //             if(pathFitness.find(i) != pathFitness.end()){
+    //                 cout << i << endl;
+    //             }
+    //         }
+    //     }
+    // }
 
     //initialise population
     void initialisePopulation(){
@@ -522,10 +501,10 @@ class Genetic{
         string bestSolution = "";
         double bestFitness = 0;
         for(int i = 0; i < maxIterations; i++){
-            for(int j = 0; j < populationSize; j++){
+			for(int j = 0; j < populationSize; j++){
                 double randomNumber = (rand() % 100) / 100.00;
                 if (randomNumber <= 0.2) {
-                    population[j] = mutate(population[j]);                
+					population[j] = mutate(population[j]);                
                 } else if (randomNumber <= 0.8) {
                     //current best solution not equal to this chromosome
                     for(int k = 0; k < populationSize; k++){
@@ -534,7 +513,7 @@ class Genetic{
                             bestFitness = pathFitness[population[k]];
                         }
                     }
-                    population[j] = crossover(population[j], bestSolution);                                 
+					population[j] = crossover(population[j], bestSolution);           	                    
                 }
             }
             bestFitness = 0;
@@ -551,16 +530,16 @@ class Genetic{
         this->bestFitness = bestFitness;
     }
     
-    // recursive function to generate all possible chromosomes
-    void generateChromosomes(map<vector<int>, int>& pFitness, vector<int>& outDegree){
-        int maxBitSize = 1;
+  	// recursive function to generate all possible chromosomes
+	void generateChromosomes(map<vector<int>, int>& pFitness, vector<int>& outDegree){
+		int maxBitSize = 1;
         for(int i = 0; i<numberOfNodes; i++){
             if(outDegree[i]>1){
                 maxBitSize = max(maxBitSize, int(log2(outDegree[i]-1)+1));
-                decisionNodes.push_back(i);
+				decisionNodes.push_back(i);
             }
         }
-        this->maxBitSize = maxBitSize;
+		this->maxBitSize = maxBitSize;
         for(auto i: pFitness){
             vector<int> path = i.first;
             string chromosome = "";
@@ -581,7 +560,7 @@ class Genetic{
             }
             pathFitness[chromosome] = i.second;
         }
-    }
+	}
 
     int getBestFitness(){
         return this->bestFitness;
@@ -589,85 +568,88 @@ class Genetic{
 
 };
 
+int n, e;
+vector<pair<int, int>> edges;
+int fitting, trials;
+int maxNumberOfGrasshoppers, maxIteration;
+double maxF, maxL, maxCMin;
 
-void compareAverageFitness(){
-    int n, e;
-    cin >> n >> e;
-    vector<pair<int, int>> edges;
-    for (int i = 0; i < e; i++) {
-        int u, v;
-        cin >> u >> v;
-        edges.push_back({ u - 1, v - 1 });
+void overallFitting(int iteration);
+
+void grasshopperFitting(int iteration){
+    if(iteration > fitting){
+        return;
     }
 
-    // Comparing average fitness of GrassHopper and Genetic Algorithm 
-    cout<<"N,"<<"IT,"<<"Average GrassHopper Fitness,"<<"Average Genetic Fitness"<<endl;
+    maxF = 0;
+    maxL = 0;
+    maxCMin = 0;
+    int bestPerformance = 0;
+    int averagePerformance = 0;
+    double total = 0;
+
+    for(double f = 0.1; f <= 2; f += 0.1){
+        for(double l = 0; l <= 2; l += 0.1){
+            for(double cmin = 0.1; cmin <= 0.1; cmin += 0.1){
+                int grasshopperBetter = 0;
+                int trials = ::trials;
+                while(trials--){
+                    GrassHopper grasshopper(n, edges, maxNumberOfGrasshoppers, maxIteration, f, l, 1.00, cmin);  
+                    int grasshopperFitness = grasshopper.getBestFitness();  
+                    Genetic genetic(n, edges, maxNumberOfGrasshoppers, maxIteration);
+                    int geneticFitness = genetic.getBestFitness();
+                    grasshopperBetter += (grasshopperFitness >= geneticFitness);
+                }
+                if(grasshopperBetter > bestPerformance){
+                    maxF = f;
+                    maxL = l;
+                    maxCMin = cmin;
+                    bestPerformance = grasshopperBetter;
+                }
+                averagePerformance += (grasshopperBetter >= (::trials/2));
+                total++;
+            }
+        }
+    }
+    cout << "n = " << maxNumberOfGrasshoppers << " and it = " << maxIteration << ": " << 100*averagePerformance/total << "%" << endl;
+    overallFitting(iteration+1);
+}
+
+void overallFitting(int iteration){
+    if(iteration == fitting){
+        return;
+    }
+
+    maxNumberOfGrasshoppers = 0;
+    maxIteration = 0;
+    int bestPerformance = 0;
+    int averagePerformance = 0;
+    double total = 0;
+
     for(int hyperparameters = 2; hyperparameters <= n/2; hyperparameters++){
         for(int maxIterations = 2; maxIterations <= n; maxIterations++){
-            cout<<hyperparameters<<","<<maxIterations<<",";
-            int trials = 1000;
-            double averageGrasshopperFitness = 0;
-            double averageGeneticFitness = 0;
+            int trials = ::trials;
+            int grasshopperFitness = 0;
+            int geneticFitness = 0;
+            int grasshopperBetter = 0;
             while(trials--){
-                GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);  
-                averageGrasshopperFitness += grasshopper.getBestFitness();  
+                GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, maxF, maxL, 1.00, maxCMin);  
+                grasshopperFitness = grasshopper.getBestFitness();  
                 Genetic genetic(n, edges, hyperparameters, maxIterations);
-                averageGeneticFitness += genetic.getBestFitness();
+                geneticFitness = genetic.getBestFitness();
+                grasshopperBetter += (grasshopperFitness >= geneticFitness);
             }
-            cout<<averageGrasshopperFitness/1000.00<<","<<averageGeneticFitness/1000.00<<endl;
+            if(grasshopperBetter >= bestPerformance){
+                maxNumberOfGrasshoppers = hyperparameters;
+                maxIteration = maxIterations;
+                bestPerformance = grasshopperBetter;
+            }
+            averagePerformance += (grasshopperBetter >= (::trials/2));
+            total++;
         }
     }
-}
-
-
-void getCountsWhereGrassHopperDominatesGenetic(){
-    int n, e;
-    cin >> n >> e;
-    vector<pair<int, int>> edges;
-    for (int i = 0; i < e; i++) {
-        int u, v;
-        cin >> u >> v;
-        edges.push_back({ u - 1, v - 1 });
-    }
-
-    // Getting counts where GrassHopper is better than genetic algorithm
-    cout<<"F,"<<"L,"<<"C,"<<"Count"<<endl;
-    int hyperparameters = 6;
-    int maxIterations = 12;
-    for(double f = 0.1; f <= 2; f += 0.1){
-        for(double l = 0.1; l <= 2; l += 0.1){
-            for(double cmin = 0; cmin <= 2; cmin += 0.1){
-                cout<<f<<","<<l<<","<<cmin<<",";
-                int trials = 1000;
-                int grasshopperWins = 0;
-                while(trials--){
-                    GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, f, l, cmin, 0.00010000000000000000);  
-                    int grasshopperFitness = grasshopper.getBestFitness();  
-                    Genetic genetic(n, edges, hyperparameters, maxIterations);
-                    int geneticFitness = genetic.getBestFitness();
-                    grasshopperWins += (grasshopperFitness >= geneticFitness);
-                }
-                cout<<grasshopperWins<<endl;
-            }
-        }
-    }
-
-}
-
-void printFitnessValues(){
-    int n, e;
-    cin >> n >> e;
-    vector<pair<int, int>> edges;
-    for (int i = 0; i < e; i++) {
-        int u, v;
-        cin >> u >> v;
-        edges.push_back({ u - 1, v - 1 });
-    }
-
-    
-    // Stack based Weight Algorithm
-    Graph g(n, edges);
-    g.printNodeFitness();
+    cout << "f = " << maxF << ", l = " << maxL << " and cmin = " << maxCMin << ": " << 100*averagePerformance/total << "%" << endl;
+    grasshopperFitting(iteration+1);
 }
 
 int main()
@@ -678,13 +660,73 @@ int main()
     cout.tie(NULL);
 
 #ifndef ONLINE_JUDGE
-    freopen("input3.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
+    freopen("input.txt", "r", stdin);
+    freopen("output1.txt", "w", stdout);
 #endif
 
-    srand(time(0)); 
-    // compareAverageFitness();
-    printFitnessValues();
-    // getCountsWhereGrassHopperDominatesGenetic();
-    return 0;
+    srand(time(0));
+    cin >> n >> e;
+    for (int i = 0; i < e; i++) {
+        int u, v;
+        cin >> u >> v;
+        edges.push_back({ u - 1, v - 1 });
+    }
+    cin >> fitting >> trials;
+    maxF = rand()%100/100.00;
+    maxL = rand()%100/100.00;
+    maxCMin = rand()%100/100.00;
+    overallFitting(0);
+    
+	return 0;
+    
+    //int goa = 0, gc = 0;
+    //int tc = 0;
+    /*for(int hyperparameters = 2; hyperparameters <= n/2; hyperparameters++){
+        for(int maxIterations = 2; maxIterations <= n; maxIterations++){
+            //tc++;
+            //cout<<hyperparameters<<","<<maxIterations<<",";
+            int trials = 1000;
+            int grasshopperFitness = 0;
+            int geneticFitness = 0;
+            vector<int> grasshopperFitnessMinusGeneticFitness;
+            int grasshopperBetter = 0;
+            while(trials--){
+                GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 0.5, 1.8, 1.00000000000000000000, 0.00010000000000000000);  
+                grasshopperFitness = grasshopper.getBestFitness();  
+                Genetic genetic(n, edges, hyperparameters, maxIterations);
+                geneticFitness = genetic.getBestFitness();
+                grasshopperFitnessMinusGeneticFitness.push_back(grasshopperFitness - geneticFitness);
+                grasshopperBetter += (grasshopperFitness >= geneticFitness);
+            }
+            cout << grasshopperBetter << endl;
+            // for(int i = 0; i<999; i++){
+            //     cout<<grasshopperFitnessMinusGeneticFitness[i]<<",";
+            // }
+            // cout<<grasshopperFitnessMinusGeneticFitness[999]<<endl;
+            //cout<<averageGrasshopperFitness<<","<<averageGeneticFitness<<endl;
+            // if(averageGrasshopperFitness==61) goa++;
+            // if(averageGeneticFitness==61) gc++;
+        }
+    }*/
+    //cout<<tc<<" "<<goa<<" "<<gc<<endl;
+    // int hyperparameters = 6;
+    // int maxIterations = 12;
+    // for(double f = 0; f <= 2; f += 0.1){
+    //     for(double l = 0; l <= 2; l += 0.1){
+    //         for(double cmin = 0.1; cmin <= 0.1; cmin += 0.1){
+    //             cout<<"F,"<<f<<","<<"L,"<<l<<","<<"C,"<<cmin<<",";
+    //             int trials = 1000;
+    //             int grasshopperWins = 0;
+    //             while(trials--){
+    //                 GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, f, l, cmin, 0.00010000000000000000);  
+    //                 int grasshopperFitness = grasshopper.getBestFitness();  
+    //                 Genetic genetic(n, edges, hyperparameters, maxIterations);
+    //                 int geneticFitness = genetic.getBestFitness();
+    //                 grasshopperWins += (grasshopperFitness >= geneticFitness);
+    //             }
+    //             cout<<grasshopperWins<<endl;
+    //         }
+    //     }
+    // }
+
 }
