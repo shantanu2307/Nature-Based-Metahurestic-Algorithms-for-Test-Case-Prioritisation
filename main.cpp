@@ -58,7 +58,19 @@ public:
     // Function to calculate information gain (Indegree * Outdegree)
     void calculateInformationGain(){
         for (int i = 0; i < numberOfNodes; i++) {
-            informationGain.push_back(inDegree[i] * outDegree[i]);
+            bool flag=false;
+            for(auto j:adj[i]){
+                if(j==i){
+                    flag=true;
+                    break;
+                }
+            }
+            if(flag){
+                informationGain.push_back((inDegree[i]-1)*(outDegree[i]-1));
+            }
+            else{
+                informationGain.push_back(inDegree[i] * outDegree[i]);
+            }
         }
     }
 
@@ -678,7 +690,7 @@ int main()
     cout.tie(NULL);
 
 #ifndef ONLINE_JUDGE
-    freopen("input3.txt", "r", stdin);
+    freopen("input.txt", "r", stdin);
     freopen("output.txt", "w", stdout);
 #endif
 
