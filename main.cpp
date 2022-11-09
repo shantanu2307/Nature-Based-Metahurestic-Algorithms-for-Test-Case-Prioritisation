@@ -182,6 +182,7 @@ public:
             return maxmFitnessFromRestNodes;
         }
 
+
         int maxReverseHeight = 0;
         int maxReverseHeightIndex = 0;
         for (int i = 0; i < outDegree[curr]; i++) {
@@ -398,7 +399,6 @@ public:
     }
 };
 
-
 class Genetic{
     int populationSize;
     int maxIterations;
@@ -601,6 +601,227 @@ class Genetic{
 
 };
 
+class Cheetah{
+
+  int numberOfNodes;
+  int dimension;
+  int numberOfCheetahs;
+  int numberOfSearchAgents;
+  int maxIterations;
+  map<vector<int>, int> pathFitness;
+  vector<vector<int>>paths;
+  vector<int>upperBound;
+  vector<int>lowerBound;
+  Graph *graph;  
+  public:
+  Cheetah(int numberOfNodes, vector<pair<int, int>>&edges, int numberOfCheetahs, int numberOfSearchAgents, int maxIterations){
+    graph=new Graph(numberOfNodes, edges);
+    vector<int> outDegree = graph -> getOutDegree();
+    map<vector<int>, int> pFitness = graph -> getPathFitness();
+    this->numberOfNodes = numberOfNodes;
+    this->numberOfCheetahs=numberOfCheetahs;
+    this->numberOfSearchAgents=numberOfSearchAgents;
+    this->maxIterations=maxIterations;
+    // Calculating Dimension
+    int dimesnion = 0;
+    for (int i = 0; i < numberOfNodes; i++) {
+        if (outDegree[i] > 1) {
+            upperBound.push_back(outDegree[i]+1);
+            lowerBound.push_back(1);
+            dimesnion++;
+        }
+    }
+    this->dimension = dimesnion;
+
+    // Calculating assign fitness to each path (just decision nodes)
+    for(auto i : pFitness) {
+        vector<int> curr;
+        for(int j = 0; j < numberOfNodes-1; j++){
+            if(outDegree[j]>1){
+                curr.push_back(i.first[j]+1);
+            }
+        }
+        paths.push_back(curr);
+        pathFitness[curr] = i.second;
+    }
+    initialise();
+  }
+
+  void initialise(){
+    set<vector<int>>initialPopulation;
+    int bestSolution=0;
+    vector<int>bestSolutionPosition;
+
+    while(initialPopulation.size()<numberOfCheetahs){
+        //select a random path from paths vector
+        int randomPathIndex = rand()%paths.size();
+        vector<int>randomPath = paths[randomPathIndex];
+        initialPopulation.insert(randomPath);
+    }
+
+    vector<vector<int>>pop(initialPopulation.begin(), initialPopulation.end());
+    vector<vector<int>>home=pop;
+
+    
+    // Finding the leader posintion
+    for(auto i: pop){
+        if(pathFitness[i]>bestSolution){
+            bestSolution=pathFitness[i];
+            bestSolutionPosition=i;
+        }
+    }
+
+
+    vector<int>X_best=bestSolutionPosition;
+
+    int t=0;
+    int it=1;
+    int maxIt=this->maxIterations;
+    vector<int>Golbest(maxIt, 0);
+    vector<int>bestCost(maxIt, 0);
+    int T=ceil(double(this->dimension)/10.00)*60;
+    while(it<=maxIt){
+        // choose m random cheetas from initial population
+        set<vector<int>>mRandomCheetahs;
+
+        while(mRandomCheetahs.size()<numberOfSearchAgents){
+            int randomCheetahIndex = rand()%initialPopulation.size();
+            auto it = initialPopulation.begin();
+            advance(it, randomCheetahIndex);
+            mRandomCheetahs.insert(*it);
+        }
+
+    
+        vector<vector<int>>mRandomCheetahsVector(mRandomCheetahs.begin(), mRandomCheetahs.end());
+        
+        
+        for(int l=0;l<mRandomCheetahsVector.size();l++){
+            // choose a random neighbour of i in mRandomCheetahs
+            int randomNeighbourIndex = rand()%mRandomCheetahs.size();
+            vector<int> randomNeighbour = mRandomCheetahsVector[randomNeighbourIndex]; // Neighbour Posn
+            vector<int> Xb=bestSolutionPosition; // Leader Posn
+            vector<int> Xbest=X_best; // Prey Posn
+            vector<int> X=mRandomCheetahsVector[l]; // Cheetah Posn
+
+            double kk=0;
+            if(randomNeighbourIndex<=1 && t>2 && t>ceil(0.2*T+1) && (abs(bestCost[t-2] - bestCost[t-ceil(0.2*T+1)]))<=0.0001*Golbest[t-1]){
+                X=X_best;
+                kk=0;
+            }
+            else if(randomNeighbourIndex==2){
+                X=bestSolutionPosition;
+                kk = -0.1 * (rand()%100)/100.00 * t/T;
+            }
+            else{
+                kk=0.25;
+            }
+
+            vector<int> Z=X;
+            vector<int>randomTestCase;
+            for(int i=0;i<dimension;i++){
+                // generate a random number between lowerBound and upperBound
+                int randomNum = abs(rand()%(upperBound[i]-1))+1;
+                randomTestCase.push_back(randomNum);
+            }
+            assert(pathFitness.find(randomTestCase) != pathFitness.end());
+
+            for(int d=0;d<dimension;d++){
+                double rHat=rand()%10;
+                double r1=(rand()%100)/100.00;
+                double alpha;
+                if(l==0){ // leader
+                    alpha=0.0001*t/T*(upperBound[d]-lowerBound[d]);
+                }
+                else{  // member
+                    alpha=0.0001*t/T*abs(Xb[d]-X[d]+1) + 0.001*round(double((rand()%100/100)>0.9));
+                }
+                double r=rand()%3;
+                double p=exp(r/2)*sin(2*3.14*r);
+                double rCheck=pow(abs(r), p); // turning factor
+                double beta=randomNeighbour[d]-X[d]; // interaction factor
+                double h0=exp(2.00 - 2.00*double(t)/double(T));
+                double H=abs(2*r1*h0 -h0);
+                double r2=(rand()%100)/100.00;
+                double r3=kk+(rand()%100)/100.00;
+                // Strategy selection
+                if(r2<r3){
+                    double r4=3.00 *(rand()%100)/100.00;
+                    if(H>r4){
+                        Z[d]=(X[d]+round(alpha/rHat)); // search
+                    }
+                    else{
+                        Z[d]=Xbest[d]+round(rCheck*beta); // attack
+                    }  
+                }
+                else{
+                    Z[d]=X[d]; // sit and wait
+                }
+
+            }
+            for(int i=0;i<dimension;i++){
+                if(Z[i]<lowerBound[i]){
+                    Z[i]=rand()%(upperBound[i]-lowerBound[i]+1)+lowerBound[i];
+                }
+                else if(Z[i]>upperBound[i]){
+                    Z[i]=rand()%(upperBound[i]-lowerBound[i]+1)+lowerBound[i];
+                }
+            }
+            vector<int>newSolution=Z;
+            int newSolutionFitness=pathFitness[newSolution];
+            if(newSolutionFitness>pathFitness[randomNeighbour]){
+                pop[randomNeighbourIndex]=newSolution;
+                if(newSolutionFitness>bestSolution){
+                    bestSolution=newSolutionFitness;
+                    bestSolutionPosition=newSolution;
+                }
+
+            }
+        }
+
+        t++;
+
+        if(t>T && t>2 && (t-round(T)-1>=0)){
+            if(abs(bestCost[t-1] - bestCost[t-round(T)-1])<=abs(0.01*bestCost[t-1])){
+                vector<int>best=X_best;
+                int j0=rand()%dimension;
+                best[j0]=rand()%(upperBound[j0]-1)+1;
+                bestSolution=pathFitness[best];
+                bestSolutionPosition=best;
+                // generate m differenct random integers between 0, n-1
+                set<int>randomIntegers;
+                while(randomIntegers.size()<numberOfSearchAgents){
+                    int randomInteger = rand()%numberOfCheetahs;
+                    randomIntegers.insert(randomInteger);
+                }
+                int ctr=0;
+                for(int i=numberOfCheetahs-numberOfSearchAgents;i<numberOfCheetahs;i++){
+                    // select ith random integer from randomIntegers
+                    auto it = randomIntegers.begin();
+                    advance(it, i);
+                    int randomInteger = *it;
+                    it=randomIntegers.begin();
+                    advance(it, ctr);
+                    int randomInteger2 = *it;
+                    pop[randomInteger]=home[randomInteger2];
+                    ctr++;
+                }
+                t=1;
+            }
+        }
+
+        it++;
+        if(bestSolution>pathFitness[X_best]){
+            X_best=bestSolutionPosition;
+        }
+        bestCost[t]=bestSolution;
+        for(int i=0;i<=t;i++){
+            Golbest[i]=pathFitness[X_best];
+        }
+    }
+    cout<<"Best Solution: Cheetah "<<pathFitness[X_best]<<endl;
+  }
+
+};
 
 void compareAverageFitness(){
     int n, e;
@@ -630,7 +851,6 @@ void compareAverageFitness(){
         }
     }
 }
-
 
 void getCountsWhereGrassHopperDominatesGenetic(){
     int n, e;
@@ -680,6 +900,7 @@ void printFitnessValues(){
     // Stack based Weight Algorithm
     Graph g(n, edges);
     g.printNodeFitness();
+    g.printPathFitness();
 }
 
 int main()
@@ -690,13 +911,26 @@ int main()
     cout.tie(NULL);
 
 #ifndef ONLINE_JUDGE
-    freopen("input.txt", "r", stdin);
+    freopen("input2.txt", "r", stdin);
     freopen("output.txt", "w", stdout);
 #endif
 
     srand(time(0)); 
     // compareAverageFitness();
-    printFitnessValues();
+    // printFitnessValues();
     // getCountsWhereGrassHopperDominatesGenetic();
+    int n, e;
+    cin >> n >> e;
+    vector<pair<int, int>> edges;
+    for (int i = 0; i < e; i++) {
+        int u, v;
+        cin >> u >> v;
+        edges.push_back({ u - 1, v - 1 });
+    }
+    GrassHopper goa(n, edges, 6, 10 ,1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);
+    Cheetah c(n, edges, 6, 3, 10);
+    Genetic g(n, edges, 6, 10);
+    cout<<"Best Solution: GrassHopper "<<goa.getBestFitness()<<endl;
+    cout<<"Best Solution: Genetic "<<g.getBestFitness()<<endl;
     return 0;
 }
