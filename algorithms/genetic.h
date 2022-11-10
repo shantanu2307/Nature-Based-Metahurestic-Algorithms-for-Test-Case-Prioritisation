@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "graph.h"
+
 using namespace std;
 
 class Genetic{

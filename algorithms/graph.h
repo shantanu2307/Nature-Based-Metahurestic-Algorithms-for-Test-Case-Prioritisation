@@ -10,6 +10,8 @@
 #include <vector>
 using namespace std;
 
+#pragma once
+
 class Graph {
     int numberOfNodes;
     vector<vector<int>> adj;
