@@ -106,8 +106,8 @@ int main()
     // cout.tie(NULL);
 
 #ifndef ONLINE_JUDGE
-    freopen("../input/online_banking.txt", "r", stdin);
-    freopen("../output/cheetah_online_banking.txt", "w", stdout);
+    freopen("../input/student_enrollment.txt", "r", stdin);
+    freopen("../output/stack_based_student_enrollment.txt", "w", stdout);
 #endif
 
     srand(time(0)); 
@@ -122,8 +122,8 @@ int main()
         cin >> u >> v;
         edges.push_back({ u - 1, v - 1 });
     }
-     
-    Cheetah cheetah(n, edges, 6,3,6);
+    Graph g(n, edges);
+    g.printNodeFitness();
 
 
     // cout<<"N,"<<"IT,"<<"Average GrassHopper Fitness,"<<"Average Genetic Fitness,"<<"Average Cheetah Fitness"<<endl;
