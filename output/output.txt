@@ -1,3 +1,0 @@
-N,IT,Average GrassHopper Fitness,Average Genetic Fitness,Average Cheetah Fitness
-4,2,41.763,32.423,43.437
-4,3,41.865,34.583,44.201

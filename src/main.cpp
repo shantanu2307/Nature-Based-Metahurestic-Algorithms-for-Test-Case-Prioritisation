@@ -106,8 +106,8 @@ int main()
     // cout.tie(NULL);
 
 #ifndef ONLINE_JUDGE
-    freopen("../input/student_enrollment.txt", "r", stdin);
-    freopen("../output/output.txt", "w", stdout);
+    freopen("../input/online_banking.txt", "r", stdin);
+    freopen("../output/cheetah_online_banking.txt", "w", stdout);
 #endif
 
     srand(time(0)); 
@@ -122,27 +122,28 @@ int main()
         cin >> u >> v;
         edges.push_back({ u - 1, v - 1 });
     }
+     
+    Cheetah cheetah(n, edges, 6,3,6);
 
 
-    cout<<"N,"<<"IT,"<<"Average GrassHopper Fitness,"<<"Average Genetic Fitness,"<<"Average Cheetah Fitness"<<endl;
-    for(int hyperparameters = 4; hyperparameters <=6; hyperparameters++){
-        for(int maxIterations = 2; maxIterations <= 6; maxIterations++){
-            cout<<hyperparameters<<","<<maxIterations<<",";
-            int trials=1000;
-            double averageGrasshopperFitness = 0;
-            double averageGeneticFitness = 0;
-            double averageCheetahFitness = 0;
-            while(trials--){
-                GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);  
-                averageGrasshopperFitness += grasshopper.getBestFitness();  
-                Genetic genetic(n, edges, hyperparameters, maxIterations);
-                averageGeneticFitness += genetic.getBestFitness();
-                Cheetah cheetah(n, edges, hyperparameters,hyperparameters-1,maxIterations);
-                averageCheetahFitness += cheetah.getBestFitness();
-            }
-            cout<<averageGrasshopperFitness/1000.00<<","<<averageGeneticFitness/1000.00<<","<<averageCheetahFitness/1000.00<<endl;
-        }
-    }
+    // cout<<"N,"<<"IT,"<<"Average GrassHopper Fitness,"<<"Average Genetic Fitness,"<<"Average Cheetah Fitness"<<endl;
+    // for(int hyperparameters = 4; hyperparameters <=6; hyperparameters++){
+    //     for(int maxIterations = 2; maxIterations <= 6; maxIterations++){
+    //         cout<<hyperparameters<<","<<maxIterations<<",";
+    //         int trials=1000;
+    //         double averageGrasshopperFitness = 0;
+    //         double averageGeneticFitness = 0;
+    //         double averageCheetahFitness = 0;
+    //         while(trials--){
+    //             GrassHopper grasshopper(n, edges, hyperparameters, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000);  
+    //             averageGrasshopperFitness += grasshopper.getBestFitness();  
+    //             averageGeneticFitness += genetic.getBestFitness();
+    //             Cheetah cheetah(n, edges, hyperparameters,hyperparameters-1,maxIterations);
+    //             averageCheetahFitness += cheetah.getBestFitness();
+    //         }
+    //         cout<<averageGrasshopperFitness/1000.00<<","<<averageGeneticFitness/1000.00<<","<<averageCheetahFitness/1000.00<<endl;
+    //     }
+    // }
 
 
     
