@@ -148,18 +148,18 @@ class Genetic{
         string bestSolution = "";
         double bestFitness = 0;
         for(int i = 0; i < maxIterations; i++){
-            cout<<"Iteration: "<<i+1<<endl;
-            cout<<"X,F(X),R,C,M,F'(X)"<<endl;
+            // cout<<"Iteration: "<<i+1<<endl;
+            // cout<<"X,F(X),R,C,M,F'(X)"<<endl;
             for(int j = 0; j < populationSize; j++){
-                cout<<population[j]<<",";
+                // cout<<population[j]<<",";
                 double randomNumber = (rand() % 100) / 100.00;
-                cout<<pathFitness[population[j]]<<",";
-                cout<<randomNumber<<",";
+                // cout<<pathFitness[population[j]]<<",";
+                // cout<<randomNumber<<",";
 
                 if (randomNumber <= 0.2) {
-                    cout<<population[j]<<",";
+                    // cout<<population[j]<<",";
                     population[j] = mutate(population[j]);                
-                    cout<<population[j]<<",";
+                    // cout<<population[j]<<",";
                 } else if (randomNumber <= 0.8) {
                     //current best solution not equal to this chromosome
                     for(int k = 0; k < populationSize; k++){
@@ -169,14 +169,14 @@ class Genetic{
                         }
                     }
                     population[j] = crossover(population[j], bestSolution);
-                    cout<<population[j]<<","; 
-                    cout<<population[j]<<",";
+                    // cout<<population[j]<<","; 
+                    // cout<<population[j]<<",";
                 }
-                else{
-                    cout<<population[j]<<",";
-                    cout<<population[j]<<",";
-                }
-                cout<<pathFitness[population[j]]<<endl;
+                // else{
+                //     // cout<<population[j]<<",";
+                //     // cout<<population[j]<<",";
+                // }
+                // cout<<pathFitness[population[j]]<<endl;
             }
             bestFitness = 0;
             bestSolution = "";
