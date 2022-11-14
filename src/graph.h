@@ -42,7 +42,7 @@ public:
             outDegree[u]++;
         }
         calculateTotalFitness();
-        traverseAllPaths();
+        // traverseAllPaths();
     }
 
     // Function to assign height from end node to each node
@@ -114,6 +114,7 @@ public:
             maxDepth = max(maxDepth, reverseHeight[i]);
         }
         maxDepth++;
+        cout<<maxDepth<<endl;
         vector<set<vector<int>>>res;
         bfs(res);
         stackBasedWeight[0]=maxDepth;

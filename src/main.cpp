@@ -21,8 +21,8 @@ int main()
 {
 
 #ifndef ONLINE_JUDGE
-    freopen("../input/student_enrollment.txt", "r", stdin);
-    freopen("../output/student_grasshopper_1000.csv", "w", stdout);
+    freopen("../input/input.txt", "r", stdin);
+    freopen("../output/output.txt", "w", stdout);
 #endif
 
     srand(time(0)); 
@@ -34,24 +34,25 @@ int main()
         cin >> u >> v;
         edges.push_back({ u - 1, v - 1 });
     }
-
-    int maxIterations=6;
-    cout<<"Sample,";
-    for(int i=0;i<1000;i++){
-        cout<<"trial "<<i<<",";
-    }
-    cout<<endl;
-    for(int sample=4;sample<=6;sample++){
-        cout<<sample<<",";
-        for(int trial=1;trial<=1000;trial++){
-            // Genetic gen(n, edges, sample, maxIterations);
-            GrassHopper gen(n, edges, sample, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000); 
-            // Cheetah gen(n, edges, sample, sample-1, maxIterations);
-            int bestFitness=gen.getBestFitness();
-            cout<<bestFitness<<",";
-        }
-        cout<<endl;        
-    }
+    Graph g(n, edges);
+    g.printNodeFitness();
+    // int maxIterations=6;
+    // cout<<"Sample,";
+    // for(int i=0;i<1000;i++){
+    //     cout<<"trial "<<i<<",";
+    // }
+    // cout<<endl;
+    // for(int sample=4;sample<=6;sample++){
+    //     cout<<sample<<",";
+    //     for(int trial=1;trial<=1000;trial++){
+    //         // Genetic gen(n, edges, sample, maxIterations);
+    //         GrassHopper gen(n, edges, sample, maxIterations, 1.19999999999999995559, 0.80000000000000004441, 1.00000000000000000000, 0.00010000000000000000); 
+    //         // Cheetah gen(n, edges, sample, sample-1, maxIterations);
+    //         int bestFitness=gen.getBestFitness();
+    //         cout<<bestFitness<<",";
+    //     }
+    //     cout<<endl;        
+    // }
 
 
 
