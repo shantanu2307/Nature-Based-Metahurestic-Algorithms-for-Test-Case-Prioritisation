@@ -21,7 +21,7 @@ int main()
 {
 
 #ifndef ONLINE_JUDGE
-    freopen("../input/input.txt", "r", stdin);
+    freopen("../input/student_enrollment.txt", "r", stdin);
     freopen("../output/output.txt", "w", stdout);
 #endif
 

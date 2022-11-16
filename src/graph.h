@@ -42,7 +42,7 @@ public:
             outDegree[u]++;
         }
         calculateTotalFitness();
-        // traverseAllPaths();
+        traverseAllPaths();
     }
 
     // Function to assign height from end node to each node
